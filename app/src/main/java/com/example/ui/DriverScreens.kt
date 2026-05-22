@@ -224,7 +224,9 @@ fun DriverDashboard(
                                     payMethod = PaymentMethod.UPI
                                 )
                             },
-                            onProceedActiveRide = { viewModel.proceedActiveRide() }
+                            onProceedActiveRide = { viewModel.proceedActiveRide() },
+                            onAcceptRide = { id -> viewModel.acceptRide(id, user.id) },
+                            onDeclineRide = { viewModel.cancelCurrentRide() }
                         )
                     }
                     "earnings" -> {
@@ -327,7 +329,9 @@ fun DriverBookingJobsTab(
     onLanguageChange: (DriverLanguage) -> Unit,
     toggleOnline: () -> Unit,
     onSimulateBooking: () -> Unit,
-    onProceedActiveRide: () -> Unit
+    onProceedActiveRide: () -> Unit,
+    onAcceptRide: (String) -> Unit,
+    onDeclineRide: () -> Unit
 ) {
     val isOnline = userProfile?.isOnline ?: false
 
@@ -497,23 +501,50 @@ fun DriverBookingJobsTab(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         // ACTIVE DISPATCH MILESTONE BUTTONS
-                        val nextStepTitle = when(activeBooking.status) {
-                            RideStatus.PENDING -> "Incoming match (Waiting)"
-                            RideStatus.ACCEPTED -> "🚩 Tap Arrived at Pickup"
-                            RideStatus.ARRIVED_PICKUP -> "📦 Tap Start Active Trip"
-                            RideStatus.ACTIVE_TRIP -> "🏁 Tap Complete Drop off"
-                            RideStatus.COMPLETED, RideStatus.CANCELLED -> "Job Finished"
-                        }
+                        if (activeBooking.status == RideStatus.PENDING) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Button(
+                                    onClick = { onAcceptRide(activeBooking.id) },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(50.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22C55E), contentColor = Color.White),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text("🟢 Accept Match", fontWeight = FontWeight.Bold)
+                                }
+                                Button(
+                                    onClick = onDeclineRide,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(50.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444), contentColor = Color.White),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text("Decline", fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        } else {
+                            val nextStepTitle = when(activeBooking.status) {
+                                RideStatus.ACCEPTED -> "🚩 Tap Arrived at Pickup"
+                                RideStatus.ARRIVED_PICKUP -> "📦 Tap Start Active Trip"
+                                RideStatus.ACTIVE_TRIP -> "🏁 Tap Complete Drop off"
+                                else -> "Job Finished"
+                            }
 
-                        Button(
-                            onClick = onProceedActiveRide,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFACC15), contentColor = Color.Black),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(nextStepTitle, fontWeight = FontWeight.Bold)
+                            Button(
+                                onClick = onProceedActiveRide,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFACC15), contentColor = Color.Black),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(nextStepTitle, fontWeight = FontWeight.Bold)
+                            }
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
