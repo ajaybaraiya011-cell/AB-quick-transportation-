@@ -1,0 +1,6 @@
+{
+  "name": "AB Quick Transportation Service",
+  "description": "Premium commercial vehicle booking, goods transport, and delivery platform for Rajkot, Gujarat.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
